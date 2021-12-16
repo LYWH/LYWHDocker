@@ -28,7 +28,7 @@ func CGroupsManagerCreater(name string, res *subsystems.ResourceConfig) *CGroups
 
 func (manager *CGroupsManager) Set() {
 	for _, chain := range subsystems.SubSystemChains {
-		if err := chain.Set(chain.Name(), manager.resource); err != nil {
+		if err := chain.Set(manager.name, manager.resource); err != nil {
 			cGroupManagerLoger.WithFields(logrus.Fields{
 				"method":  "Set",
 				"errFrom": "CGroupsManager.Set",
@@ -39,7 +39,7 @@ func (manager *CGroupsManager) Set() {
 
 func (manager *CGroupsManager) Apply(pid int) {
 	for _, chain := range subsystems.SubSystemChains {
-		if err := chain.Apply(chain.Name(), pid); err != nil {
+		if err := chain.Apply(manager.name, pid); err != nil {
 			cGroupManagerLoger.WithFields(logrus.Fields{
 				"method":  "Apply",
 				"errFrom": "CGroupsManager.Apply",
@@ -50,7 +50,7 @@ func (manager *CGroupsManager) Apply(pid int) {
 
 func (manager *CGroupsManager) Remove() {
 	for _, chain := range subsystems.SubSystemChains {
-		if err := chain.Remove(chain.Name()); err != nil {
+		if err := chain.Remove(manager.name); err != nil {
 			cGroupManagerLoger.WithFields(logrus.Fields{
 				"method":  "Remove",
 				"errFrom": "CGroupsManager.Remove",

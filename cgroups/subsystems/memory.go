@@ -20,7 +20,7 @@ type MemoeySubSystem struct {
 
 const (
 	memoryLimitFile = "memory.limit_in_bytes"
-	taskFile        = "task"
+	taskFile        = "tasks"
 )
 
 var memoryLog = log.Mylog.WithFields(logrus.Fields{
