@@ -24,4 +24,5 @@ type SubSystem interface {
 var SubSystemChains = []SubSystem{
 	&MemoeySubSystem{},
 	&CpuSubSystem{},
+	&CpuSetSubSystem{},
 }
