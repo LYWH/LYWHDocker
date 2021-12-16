@@ -1,6 +1,8 @@
 package container
 
 import (
+	"LYWHDocker/cgroups"
+	"LYWHDocker/cgroups/subsystems"
 	"LYWHDocker/log"
 	"os"
 	"os/exec"
@@ -42,9 +44,19 @@ func getParentProcess(tty bool, command string) *exec.Cmd {
 //  @param tty
 //  @param command
 //
-func RunContainer(tty bool, command string) {
-	process := getParentProcess(tty, command)
-	if err := process.Run(); err != nil {
+func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig) {
+	process := getParentProcess(tty, cmd)
+	if err := process.Start(); err != nil {
 		log.Mylog.WithField("method", "syscall.Mount").Error(err)
+		//开始限制资源
+
 	}
+	cgroupsManager := cgroups.CGroupsManagerCreater(cgroupsManagerName, res)
+	cgroupsManager.Set()
+	cgroupsManager.Apply(process.Process.Pid)
+	if err := process.Wait(); err != nil {
+		log.Mylog.Error(err)
+	}
+	cgroupsManager.Remove()
+	os.Exit(1)
 }

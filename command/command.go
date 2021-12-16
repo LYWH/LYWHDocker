@@ -1,12 +1,17 @@
 package command
 
 import (
+	"LYWHDocker/cgroups/subsystems"
 	"LYWHDocker/container"
 	"fmt"
 	"github.com/spf13/cobra"
 )
 
-var tty = false
+var (
+	tty           = false
+	resourceLimit = &subsystems.ResourceConfig{}
+	myCgroupsName = "LYWHCGroups"
+)
 
 const (
 	rootUse = "root"
@@ -37,7 +42,7 @@ var runCommand = &cobra.Command{
 		//log.Mylog.Info(runUse)
 		//log.Mylog.Info(args,tty)
 		////fmt.Printf("%T\n",args[0])
-		container.RunContainer(tty, args[0])
+		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit)
 	},
 }
 
