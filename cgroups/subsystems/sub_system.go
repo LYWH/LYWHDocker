@@ -8,7 +8,10 @@ createData:2021/12/16
 //实现子系统类型
 
 type ResourceConfig struct {
-	Memory string //对内存资源的限制
+	Memory   string //对内存资源的限制
+	CpuShare string //cpu时间片权重
+	CpuSet   string // CPU核心数
+	CpuMems  string // CPU Node内存
 }
 
 type SubSystem interface {
@@ -20,4 +23,5 @@ type SubSystem interface {
 
 var SubSystemChains = []SubSystem{
 	&MemoeySubSystem{},
+	&CpuSubSystem{},
 }
