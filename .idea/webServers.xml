@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="5f3e1607-969f-4810-b4a9-5e942a62c8b9" name="MyUbuntuServer">
+        <fileTransfer rootFolder="/home/lywh/Learning/go/code/" accessType="SFTP" host="192.168.31.51" port="22" sshConfigId="b2d4d5bf-397a-4a7d-959c-8f8f8c18f679" sshConfig="lywh@192.168.31.51:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
