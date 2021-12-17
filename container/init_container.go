@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 	"syscall"
 )
@@ -25,31 +26,16 @@ var initContainerLog = log.Mylog.WithFields(logrus.Fields{
 func InitNewNameSpace() error {
 	//先将挂载方式设置成私有方式，方式新的namespace中挂载后影响宿主机的proc
 	cmds := getCommands()
-	privateMountFlag := syscall.MS_REC | syscall.MS_PRIVATE
-	//设置传递和私有的挂载方式，使得新的namespace中挂载后影响宿主机的proc
-	if err := syscall.Mount("", "/proc", "proc", uintptr(privateMountFlag), ""); err != nil {
-		log.Mylog.WithField("method", "syscall.Mount").Error(err)
-		return err
-	}
-	//syscall.MS_NOEXEC:不允许执行在这个文件系统执行程序
-	// syscall.MS_NOSUID:当从这个文件系统执行程序时，不可使用set-user-ID和set-group-ID
-	//syscall.MS_NODEV:不允许访问特殊设备
-	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
-	if err := syscall.Mount("", "/proc", "proc", uintptr(defaultMountFlags), ""); err != nil {
-		log.Mylog.WithField("method", "syscall.Mount").Error(err)
-		return err
-	}
 
-	//使用cmd程序替换掉init初始化进程
-	//此处先要去寻找命令的绝对路径
+	setUpMount()
 
-	path, err := exec.LookPath(cmds[0])
+	absolutePath, err := exec.LookPath(cmds[0])
 	if err != nil {
 		initContainerLog.WithFields(logrus.Fields{
 			"err": "error command,can't find it",
 		})
 	}
-	if err := syscall.Exec(path, cmds, os.Environ()); err != nil {
+	if err := syscall.Exec(absolutePath, cmds, os.Environ()); err != nil {
 		log.Mylog.WithField("method", "syscall.Mount").Error(err)
 		return err
 	}
@@ -74,4 +60,103 @@ func getCommands() []string {
 	}
 	//按照空行分割cmd，此处ioutil.ReadAll返回的是[]byte类型
 	return strings.Split(string(cmds), " ")
+}
+
+//
+//  povit_root
+//  @Description:更改当前容器的root目录
+//  @param newRoot
+//  @return error
+//
+func povitRoot(newRoot string) error {
+	//1:利用mount将newRoot生成一个挂载点
+	if err := syscall.Mount(newRoot, newRoot, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"errerFrom": "povitRoot",
+			"err":       err,
+		})
+		return err
+	}
+	//2:在newRoot目录下生成.old_root文件夹，用于povit_root切换工作目录
+	oldPath := path.Join(newRoot, ".old_root")
+	if _, err := os.Stat(oldPath); err == nil {
+		//说明目录存在，需要删除
+		if err := os.RemoveAll(oldPath); err != nil {
+			initContainerLog.WithFields(logrus.Fields{
+				"errFrom": "povitRoot",
+				"err":     err,
+			})
+		}
+		return err
+	}
+	if err := os.Mkdir(oldPath, 0755); err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"errFrom": "povitRoot",
+			"err":     err,
+		})
+		return err
+	}
+	//3使用povit_root切换工作目录
+	if err := syscall.PivotRoot(newRoot, oldPath); err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"errFrom": "povitRoot",
+			"err":     err,
+		})
+		return err
+	}
+	//4 修改当前的工作目录到切换后的根目录
+	if err := os.Chdir("/"); err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"errFrom": "povitRoot",
+			"err":     err,
+		})
+		return err
+	}
+	//5 umount原目录
+	oldPath = path.Join("/", ".old_root") //由于工作目录已经切换，所以需要更改oldPath目录
+	if err := syscall.Unmount(oldPath, syscall.MNT_DETACH); err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"errFrom": "povitRoot",
+			"err":     err,
+		})
+		return err
+	}
+	return nil
+}
+
+func setUpMount() error {
+	//将启动目录mount为当前环境的系统目录
+	//将系统根目录设置为私有模式，因为povitRoot目录中有许多mount系统调用,防止容器与宿主机相互影响
+	if err := syscall.Mount("/", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, ""); err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"errFrom": "setUpMount",
+			"err":     err,
+		})
+		return err
+	}
+	//获取启动目录
+	startUpPath, err := os.Getwd()
+	if err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"errFrom": "setUpMount",
+			"err":     err,
+		})
+	}
+	//切换系统目录
+	if err := povitRoot(startUpPath); err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"errFrom": "setUpMount",
+			"err":     err,
+		})
+	}
+	//设置挂载点
+	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
+	if err := syscall.Mount("", "/proc", "proc", uintptr(defaultMountFlags), ""); err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"errFrom": "setUpMount",
+			"err":     err,
+		})
+		return err
+	}
+	return nil
 }
