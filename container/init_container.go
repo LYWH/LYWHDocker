@@ -2,7 +2,11 @@ package container
 
 import (
 	"LYWHDocker/log"
+	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"os"
+	"os/exec"
+	"strings"
 	"syscall"
 )
 
@@ -14,9 +18,14 @@ import (
 //  @param args
 //  @return error
 //
-func InitNewNameSpace(cmd string, args []string) error {
+
+var initContainerLog = log.Mylog.WithFields(logrus.Fields{
+	"part": "initcontainer",
+})
+
+func InitNewNameSpace() error {
 	//先将挂载方式设置成私有方式，方式新的namespace中挂载后影响宿主机的proc
-	log.Mylog.Info("====", cmd, args)
+	cmds := getCommands()
 	privateMountFlag := syscall.MS_REC | syscall.MS_PRIVATE
 	//设置传递和私有的挂载方式，使得新的namespace中挂载后影响宿主机的proc
 	if err := syscall.Mount("", "/proc", "proc", uintptr(privateMountFlag), ""); err != nil {
@@ -32,11 +41,38 @@ func InitNewNameSpace(cmd string, args []string) error {
 		return err
 	}
 
-	argsv := []string{cmd}
 	//使用cmd程序替换掉init初始化进程
-	if err := syscall.Exec(cmd, argsv, os.Environ()); err != nil {
+	//此处先要去寻找命令的绝对路径
+
+	path, err := exec.LookPath(cmds[0])
+	if err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"err": "error command,can't find it",
+		})
+	}
+
+	if err := syscall.Exec(path, cmds, os.Environ()); err != nil {
 		log.Mylog.WithField("method", "syscall.Mount").Error(err)
 		return err
 	}
 	return nil
+}
+
+func getCommands() []string {
+	reader := os.NewFile(uintptr(3), "pipe")
+	if reader == nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"err": "no pipe",
+		})
+		return nil
+	}
+	cmds, err := ioutil.ReadAll(reader)
+	if err != nil {
+		initContainerLog.WithFields(logrus.Fields{
+			"err": "no commands",
+		})
+		return nil
+	}
+	//按照空行分割cmd，此处ioutil.ReadAll返回的是[]byte类型
+	return strings.Split(string(cmds), " ")
 }

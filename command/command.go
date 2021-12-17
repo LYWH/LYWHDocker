@@ -32,12 +32,13 @@ var initCommand = &cobra.Command{
 	Use:   initUse,
 	Short: "use for init Container",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return container.InitNewNameSpace(args[0], nil)
+		return container.InitNewNameSpace()
 	},
 }
 
 var runCommand = &cobra.Command{
-	Use: runUse,
+	Use:  runUse,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		//log.Mylog.Info(runUse)
 		//log.Mylog.Info(args,tty)
