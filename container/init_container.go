@@ -18,7 +18,6 @@ import (
 //  @param args
 //  @return error
 //
-
 var initContainerLog = log.Mylog.WithFields(logrus.Fields{
 	"part": "initcontainer",
 })
@@ -50,7 +49,6 @@ func InitNewNameSpace() error {
 			"err": "error command,can't find it",
 		})
 	}
-
 	if err := syscall.Exec(path, cmds, os.Environ()); err != nil {
 		log.Mylog.WithField("method", "syscall.Mount").Error(err)
 		return err
