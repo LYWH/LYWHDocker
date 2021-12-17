@@ -69,9 +69,14 @@ func getPip() (*os.File, *os.File, error) {
 	return reader, writer, err
 }
 
+//
+//  sendCommand
+//  @Description: 向子进程发送消息
+//  @param writer
+//  @param cmd
+//  @return error
 func sendCommand(writer *os.File, cmd string) error {
 	if _, err := writer.WriteString(cmd); err != nil {
-
 		runContainerLog.WithFields(logrus.Fields{
 			"err": err,
 		})

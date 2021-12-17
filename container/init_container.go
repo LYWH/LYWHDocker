@@ -59,6 +59,7 @@ func InitNewNameSpace() error {
 }
 
 func getCommands() []string {
+	//由于标准输入、输出和错误三个文件描述符否是默认被子进程继承的，因此管道文件描述符的index为3
 	reader := os.NewFile(uintptr(3), "pipe")
 	if reader == nil {
 		initContainerLog.WithFields(logrus.Fields{
