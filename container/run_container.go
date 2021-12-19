@@ -51,7 +51,7 @@ func getParentProcess(tty bool) (*exec.Cmd, *os.File) {
 	}
 	//指定子进程继承管道的reader端
 	cmd.ExtraFiles = []*os.File{reader}
-	cmd.Dir = "/home/lywh/busybox/"
+	cmd.Dir = "/home/lywh/busybox/" //指定工作目录
 	return cmd, writer
 }
 

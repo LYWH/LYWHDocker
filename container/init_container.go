@@ -2,6 +2,7 @@ package container
 
 import (
 	"LYWHDocker/log"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -136,6 +137,7 @@ func setUpMount() error {
 	}
 	//获取启动目录
 	startUpPath, err := os.Getwd()
+	fmt.Println("启动目录:", startUpPath)
 	if err != nil {
 		initContainerLog.WithFields(logrus.Fields{
 			"errFrom": "setUpMount",
