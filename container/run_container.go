@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
+	"path"
 	"syscall"
 )
 
@@ -21,7 +22,7 @@ var runContainerLog = log.Mylog.WithFields(logrus.Fields{
 	"part": "runcontainer",
 })
 
-func getParentProcess(tty bool, volume string) (*exec.Cmd, *os.File, []string) {
+func getParentProcess(tty bool, volume string, containerID string) (*exec.Cmd, *os.File, []string) {
 	//此处也不需要传递命令参数，命令的传递需要通过专门的发送和接收函数
 	//生成管道
 	reader, writer, err := getPip()
@@ -49,10 +50,10 @@ func getParentProcess(tty bool, volume string) (*exec.Cmd, *os.File, []string) {
 	}
 	//指定子进程继承管道的reader端
 	cmd.ExtraFiles = []*os.File{reader}
-	rootUrl := "./"
-	mntUrl := "./mnt"
+	rootUrl := "/var/lib/LYWHDocker/aufs/"
+	mntUrl := path.Join(rootUrl, "mnt", containerID)
 	imageName := "busybox"
-	workSpaceRelatePath := newWorkSpace(rootUrl, imageName, volume)
+	workSpaceRelatePath := newWorkSpace(rootUrl, imageName, volume, containerID)
 	cmd.Dir = mntUrl //指定工作目录
 	return cmd, writer, workSpaceRelatePath
 }
@@ -101,7 +102,7 @@ func sendCommand(writer *os.File, cmd string) error {
 //  @param command
 //
 func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig, Volume string, containerName string, containerID string) {
-	process, writer, workSpaceRelatePath := getParentProcess(tty, Volume)
+	process, writer, workSpaceRelatePath := getParentProcess(tty, Volume, containerID)
 	if err := process.Start(); err != nil {
 		log.Mylog.WithField("method", "syscall.Mount").Error(err)
 		runContainerLog.WithFields(logrus.Fields{
