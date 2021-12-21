@@ -9,12 +9,13 @@ import (
 )
 
 var (
-	tty           = false
-	resourceLimit = &subsystems.ResourceConfig{}
-	myCgroupsName = "LYWHCGroups"
-	Volume        = ""
-	detach        = false
-	name          = ""
+	tty               = false
+	resourceLimit     = &subsystems.ResourceConfig{}
+	myCgroupsName     = "LYWHCGroups"
+	Volume            = ""
+	detach            = false
+	containerName     = ""
+	containerIDLenggh = 15
 )
 
 const (
@@ -50,7 +51,9 @@ var runCommand = &cobra.Command{
 			log.Mylog.Error("tty and detach can't provide at the same time")
 			return
 		}
-		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, name)
+		//在此处生成容器ID
+		containerID := container.GenerateContainerID(containerIDLenggh)
+		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, containerName, containerID)
 	},
 }
 

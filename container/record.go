@@ -44,7 +44,7 @@ var (
 //  @param n 容器id长度
 //  @return string
 //
-func generateContainerID(n int) string {
+func GenerateContainerID(n int) string {
 	if n < 0 || n > 32 {
 		n = 32
 	}
@@ -52,8 +52,8 @@ func generateContainerID(n int) string {
 	return fmt.Sprintf("%x", hashByte[:n])
 }
 
-func recordContainerInfo(containerPID int, cmd []string, containerName string) (string, error) {
-	containerID := generateContainerID(IDLength)
+func recordContainerInfo(containerPID int, cmd []string, containerName string, containerID string) error {
+	//containerID := GenerateContainerID(IDLength)
 	createTime := time.Now().Format("2006-01-02 15:04:05")
 	if containerName == "" {
 		containerName = containerID
@@ -71,14 +71,14 @@ func recordContainerInfo(containerPID int, cmd []string, containerName string) (
 	jsonByte, err := json.Marshal(containerInfo)
 	if err != nil {
 		log.Mylog.Error("containerInfo", "Marshal", err)
-		return "", err
+		return err
 	}
 	//将相应的信息写入对应文件夹中
 	//创建文件夹
 	infoPath := path.Join(DefaultInfoLocation, containerID)
 	if err = os.MkdirAll(infoPath, 0711); err != nil {
 		log.Mylog.Error("infoPath", "os.MkdirAll", err)
-		return "", err
+		return err
 	}
 	infoJsonFile := path.Join(infoPath, ConfigName)
 	//创建json文件
@@ -86,13 +86,13 @@ func recordContainerInfo(containerPID int, cmd []string, containerName string) (
 	defer configFile.Close()
 	if err != nil {
 		log.Mylog.Error("infoJsonFile", "os.OpenFile", err)
-		return "", err
+		return err
 	}
 	//将创建的json文件写入其中
 	if _, err = configFile.WriteString(string(jsonByte)); err != nil {
 		log.Mylog.Error("configFile.WriteString", jsonByte, err)
 	}
-	return containerID, nil
+	return nil
 }
 
 func deleteConfigInfo(containerId string) {
