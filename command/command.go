@@ -15,9 +15,10 @@ var (
 )
 
 const (
-	rootUse = "root"
-	initUse = "init"
-	runUse  = "run"
+	rootUse   = "root"
+	initUse   = "init"
+	runUse    = "run"
+	commitUse = "commit"
 )
 
 var rootCommand = &cobra.Command{
@@ -45,6 +46,16 @@ var runCommand = &cobra.Command{
 		//log.Mylog.Info(args,tty)
 		////fmt.Printf("%T\n",args[0])
 		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume)
+	},
+}
+
+var commitCommand = &cobra.Command{
+	Use:   commitUse,
+	Short: "commit the runing container",
+	Long:  "commit the runing container",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		container.CommitContainer(args[0])
 	},
 }
 
