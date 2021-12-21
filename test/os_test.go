@@ -16,3 +16,9 @@ func TestOsStat(t *testing.T) {
 	fmt.Println("-====", f)
 	fmt.Println("++++++", err)
 }
+
+//func TestContainerIDGenerator(t *testing.T) {
+//	n := 15
+//	result := container.GenerateContainerID(n)
+//	fmt.Println(result)
+//}

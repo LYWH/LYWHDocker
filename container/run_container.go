@@ -100,7 +100,7 @@ func sendCommand(writer *os.File, cmd string) error {
 //  @param tty
 //  @param command
 //
-func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig, Volume string) {
+func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig, Volume string, containerName string) {
 	process, writer, workSpaceRelatePath := getParentProcess(tty, Volume)
 	if err := process.Start(); err != nil {
 		log.Mylog.WithField("method", "syscall.Mount").Error(err)
@@ -110,7 +110,13 @@ func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsyste
 		})
 		//开始限制资源
 	}
-	err := sendCommand(writer, cmd)
+	//记录容器信息
+	containerId, err := recordContainerInfo(process.Process.Pid, []string{cmd}, containerName)
+	if err != nil {
+		log.Mylog.Error("recordContainerInfo", err)
+		return
+	}
+	err = sendCommand(writer, cmd)
 	if err != nil {
 		return
 	}
@@ -121,6 +127,7 @@ func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsyste
 		if err = process.Wait(); err != nil {
 			log.Mylog.Error(err)
 		}
+		deleteConfigInfo(containerId)
 		cgroupsManager.Remove()
 		deleteWorkSpace(workSpaceRelatePath)
 		os.Exit(1)

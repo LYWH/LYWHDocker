@@ -14,6 +14,7 @@ var (
 	myCgroupsName = "LYWHCGroups"
 	Volume        = ""
 	detach        = false
+	name          = ""
 )
 
 const (
@@ -49,7 +50,7 @@ var runCommand = &cobra.Command{
 			log.Mylog.Error("tty and detach can't provide at the same time")
 			return
 		}
-		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume)
+		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, name)
 	},
 }
 
