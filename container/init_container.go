@@ -171,10 +171,13 @@ func setUpMount() error {
 //  @param rootUrl
 //  @param imageName
 //
-func newWorkSpace(rootUrl, imageName string) []string {
+func newWorkSpace(rootUrl, imageName, volumeUrl string) []string {
 	readOnlyLayer := createReadOnlyLayer(rootUrl, imageName)
 	readAndWriteLayer := createReadAndWriteLayer(rootUrl)
 	mntLayer := createMountLayer(rootUrl, readOnlyLayer, readAndWriteLayer)
+	if _, err := extraVolumeUrl(volumeUrl); err == nil {
+		mountVolume(volumeUrl, mntLayer)
+	}
 	return []string{mntLayer, readAndWriteLayer}
 }
 
@@ -244,7 +247,7 @@ func createReadAndWriteLayer(rootUrl string) string {
 //
 func createMountLayer(rootPath, readOnlyPath, readAndWriteLayer string) string {
 	mntPath := rootPath + "mnt" + "/"
-	if has, err := DirOrFileExist(mntPath); err == nil && !has {
+	if has, err := DirOrFileExist(mntPath); err == nil && has {
 		//说明存在，先将其删除
 		if err = os.RemoveAll(mntPath); err != nil {
 			initContainerLog.WithFields(logrus.Fields{
@@ -284,7 +287,7 @@ func deleteWorkSpace(workSpacePath []string) {
 }
 
 func deleteMountLayer(mountLayer string) {
-	cmd := exec.Command("umount", mountLayer)
+	cmd := exec.Command("umount", "-R", mountLayer) //注意，此处时循环卸载，所以数据卷挂载也能被卸载掉
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

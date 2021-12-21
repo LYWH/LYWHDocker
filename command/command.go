@@ -11,6 +11,7 @@ var (
 	tty           = false
 	resourceLimit = &subsystems.ResourceConfig{}
 	myCgroupsName = "LYWHCGroups"
+	Volume        = ""
 )
 
 const (
@@ -43,7 +44,7 @@ var runCommand = &cobra.Command{
 		//log.Mylog.Info(runUse)
 		//log.Mylog.Info(args,tty)
 		////fmt.Printf("%T\n",args[0])
-		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit)
+		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume)
 	},
 }
 
