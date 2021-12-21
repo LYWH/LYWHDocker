@@ -1,8 +1,6 @@
 package main
 
-import (
-	"LYWHDocker/command"
-)
+import "LYWHDocker/command"
 
 func main() {
 	command.Execute()

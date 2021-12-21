@@ -17,12 +17,11 @@ import (
 //  @param command
 //  @return *exec.Cmd
 //
-
 var runContainerLog = log.Mylog.WithFields(logrus.Fields{
 	"part": "runcontainer",
 })
 
-func getParentProcess(tty bool) (*exec.Cmd, *os.File) {
+func getParentProcess(tty bool) (*exec.Cmd, *os.File, []string) {
 	//此处也不需要传递命令参数，命令的传递需要通过专门的发送和接收函数
 	//生成管道
 	reader, writer, err := getPip()
@@ -30,7 +29,7 @@ func getParentProcess(tty bool) (*exec.Cmd, *os.File) {
 		runContainerLog.WithFields(logrus.Fields{
 			"err": err,
 		})
-		return nil, nil
+		return nil, nil, []string{}
 	}
 	//argsAll := []string{"init", command}
 	// /proc/self代表当前进程运行的环境，exe代表本程序的启动命令(一个链接文件)，在command中使用/proc/self/exe代表自己调用自己
@@ -40,7 +39,6 @@ func getParentProcess(tty bool) (*exec.Cmd, *os.File) {
 		Cloneflags: syscall.CLONE_NEWNS | syscall.CLONE_NEWPID | syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC |
 			syscall.CLONE_NEWNET,
 	}
-
 	//syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS |
 	//	syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC
 	//启用tty需要将os的标准流重定向
@@ -51,8 +49,12 @@ func getParentProcess(tty bool) (*exec.Cmd, *os.File) {
 	}
 	//指定子进程继承管道的reader端
 	cmd.ExtraFiles = []*os.File{reader}
-	cmd.Dir = "/home/lywh/busybox/" //指定工作目录
-	return cmd, writer
+	rootUrl := "./"
+	mntUrl := "./mnt"
+	imageName := "busybox"
+	workSpaceRelatePath := newWorkSpace(rootUrl, imageName)
+	cmd.Dir = mntUrl //指定工作目录
+	return cmd, writer, workSpaceRelatePath
 }
 
 //
@@ -99,9 +101,13 @@ func sendCommand(writer *os.File, cmd string) error {
 //  @param command
 //
 func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig) {
-	process, writer := getParentProcess(tty)
+	process, writer, workSpaceRelatePath := getParentProcess(tty)
 	if err := process.Start(); err != nil {
 		log.Mylog.WithField("method", "syscall.Mount").Error(err)
+		runContainerLog.WithFields(logrus.Fields{
+			"err":     err,
+			"errfrom": "RunContainer",
+		})
 		//开始限制资源
 	}
 	err := sendCommand(writer, cmd)
@@ -111,9 +117,10 @@ func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsyste
 	cgroupsManager := cgroups.CGroupsManagerCreater(cgroupsManagerName, res)
 	cgroupsManager.Set()
 	cgroupsManager.Apply(process.Process.Pid)
-	if err := process.Wait(); err != nil {
+	if err = process.Wait(); err != nil {
 		log.Mylog.Error(err)
 	}
 	cgroupsManager.Remove()
+	deleteWorkSpace(workSpaceRelatePath)
 	os.Exit(1)
 }

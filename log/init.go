@@ -7,8 +7,10 @@ import (
 
 func init() {
 	Mylog.Out = os.Stdout
-	Mylog.SetLevel(logrus.InfoLevel)
+	Mylog.SetLevel(logrus.ErrorLevel)
+
 	Mylog.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
+	Mylog.SetReportCaller(true)
 }
