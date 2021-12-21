@@ -3,6 +3,7 @@ package command
 import (
 	"LYWHDocker/cgroups/subsystems"
 	"LYWHDocker/container"
+	"LYWHDocker/log"
 	"fmt"
 	"github.com/spf13/cobra"
 )
@@ -12,6 +13,7 @@ var (
 	resourceLimit = &subsystems.ResourceConfig{}
 	myCgroupsName = "LYWHCGroups"
 	Volume        = ""
+	detach        = false
 )
 
 const (
@@ -42,9 +44,11 @@ var runCommand = &cobra.Command{
 	Use:  runUse,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		//log.Mylog.Info(runUse)
-		//log.Mylog.Info(args,tty)
-		////fmt.Printf("%T\n",args[0])
+		//不允许终端和后台同时运行
+		if tty && detach {
+			log.Mylog.Error("tty and detach can't provide at the same time")
+			return
+		}
 		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume)
 	},
 }

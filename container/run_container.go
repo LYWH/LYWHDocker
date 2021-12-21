@@ -117,10 +117,13 @@ func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsyste
 	cgroupsManager := cgroups.CGroupsManagerCreater(cgroupsManagerName, res)
 	cgroupsManager.Set()
 	cgroupsManager.Apply(process.Process.Pid)
-	if err = process.Wait(); err != nil {
-		log.Mylog.Error(err)
+	if tty {
+		if err = process.Wait(); err != nil {
+			log.Mylog.Error(err)
+		}
+		cgroupsManager.Remove()
+		deleteWorkSpace(workSpaceRelatePath)
+		os.Exit(1)
 	}
-	cgroupsManager.Remove()
-	deleteWorkSpace(workSpaceRelatePath)
-	os.Exit(1)
+
 }

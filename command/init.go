@@ -8,4 +8,5 @@ func init() {
 	runCommand.Flags().StringVarP(&resourceLimit.CpuSet, "cpu-set", "", "0", "cpu set")
 	runCommand.Flags().StringVarP(&resourceLimit.CpuMems, "cpu-mems", "", "0", "cpu share")
 	runCommand.Flags().StringVarP(&Volume, "value", "v", "", "volume")
+	runCommand.Flags().BoolVarP(&detach, "detach", "d", false, "making the container process detach")
 }
