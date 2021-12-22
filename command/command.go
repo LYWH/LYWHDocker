@@ -16,6 +16,7 @@ var (
 	detach            = false
 	containerName     = ""
 	containerIDLenggh = 15
+	//inputContainerID  = ""
 )
 
 const (
@@ -24,6 +25,7 @@ const (
 	runUse    = "run"
 	commitUse = "commit"
 	psUse     = "ps"
+	logUse    = "log"
 )
 
 var rootCommand = &cobra.Command{
@@ -74,6 +76,16 @@ var psCommand = &cobra.Command{
 	Long:  "ps displays information about a selection of the active processes.",
 	Run: func(cmd *cobra.Command, args []string) {
 		container.OutputContainerInfo()
+	},
+}
+
+var logCommand = &cobra.Command{
+	Use:   logUse,
+	Short: "output container log",
+	Long:  "output container log",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		container.OutPutContainerLog(args[0])
 	},
 }
 

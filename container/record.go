@@ -104,6 +104,10 @@ func deleteConfigInfo(containerId string) {
 	}
 }
 
+//
+//  OutputContainerInfo
+//  @Description: 格式化展示容器信息
+//
 func OutputContainerInfo() {
 	files, err := ioutil.ReadDir(DefaultInfoLocation)
 	if err != nil {
@@ -124,7 +128,7 @@ func OutputContainerInfo() {
 	fmt.Fprint(w, "ID\tNAME\tPID\tSTATUS\tCOMMAND\tCREATED\n")
 	for _, item := range containersInfo {
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
-			item.Pid, item.Name, item.Pid, item.Status, item.Command, item.CreateTime)
+			item.Id, item.Name, item.Pid, item.Status, item.Command, item.CreateTime)
 	}
 	if err = w.Flush(); err != nil {
 		log.Mylog.Error("w.Flush", err)

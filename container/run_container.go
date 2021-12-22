@@ -47,6 +47,9 @@ func getParentProcess(tty bool, volume string, containerID string) (*exec.Cmd, *
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+	} else {
+		logFile := GetContainerLogFile(containerID)
+		cmd.Stdout = logFile
 	}
 	//指定子进程继承管道的reader端
 	cmd.ExtraFiles = []*os.File{reader}
