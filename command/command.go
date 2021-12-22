@@ -23,6 +23,7 @@ const (
 	initUse   = "init"
 	runUse    = "run"
 	commitUse = "commit"
+	psUse     = "ps"
 )
 
 var rootCommand = &cobra.Command{
@@ -64,6 +65,15 @@ var commitCommand = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		container.CommitContainer(args[0])
+	},
+}
+
+var psCommand = &cobra.Command{
+	Use:   psUse,
+	Short: "ps displays information about a selection of the active processes.",
+	Long:  "ps displays information about a selection of the active processes.",
+	Run: func(cmd *cobra.Command, args []string) {
+		container.OutputContainerInfo()
 	},
 }
 

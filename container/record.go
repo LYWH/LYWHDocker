@@ -5,10 +5,12 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 	"time"
 )
 
@@ -100,4 +102,58 @@ func deleteConfigInfo(containerId string) {
 	if err := os.RemoveAll(dirUrl); err != nil {
 		log.Mylog.Error("os.RemoveAll", "deleteConfigInfo", err)
 	}
+}
+
+func OutputContainerInfo() {
+	files, err := ioutil.ReadDir(DefaultInfoLocation)
+	if err != nil {
+		log.Mylog.Error("outputContainerInfo", "ioutil.ReadDir", err)
+		return
+	}
+	var containersInfo []*ContainerInfo
+
+	for _, file := range files { //读取DefaultInfoLocation文件夹下所有文件夹的内容
+		containerInfo, err := getContainerInfo(file.Name())
+		if err != nil {
+			log.Mylog.Error("getContainerInfo", err)
+			return
+		}
+		containersInfo = append(containersInfo, containerInfo)
+	}
+	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
+	fmt.Fprint(w, "ID\tNAME\tPID\tSTATUS\tCOMMAND\tCREATED\n")
+	for _, item := range containersInfo {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
+			item.Pid, item.Name, item.Pid, item.Status, item.Command, item.CreateTime)
+	}
+	if err = w.Flush(); err != nil {
+		log.Mylog.Error("w.Flush", err)
+	}
+}
+
+//
+//  getContainerInfo
+//  @Description: 读取某一个进程的信息
+//  @param containerID
+//  @return *ContainerInfo
+//  @return error
+//
+func getContainerInfo(containerID string) (*ContainerInfo, error) {
+	containerPath := path.Join(DefaultInfoLocation, containerID, ConfigName)
+	if has, err := DirOrFileExist(containerPath); !has && err == nil {
+		log.Mylog.Error("getContainerInfo", containerPath, err)
+		return nil, err
+	}
+	var containerInfo ContainerInfo
+	//读取相应的Json文件
+	content, err := ioutil.ReadFile(containerPath)
+	if err != nil {
+		log.Mylog.Error("getContainerInfo", "ioutil.ReadFile", err)
+		return nil, err
+	}
+	if err = json.Unmarshal(content, &containerInfo); err != nil {
+		log.Mylog.Error("getContainerInfo", "json.Unmarshal", err)
+		return nil, err
+	}
+	return &containerInfo, nil
 }
