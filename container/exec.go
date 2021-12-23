@@ -43,7 +43,6 @@ func EnterContainer(containerID string, containerCMD []string) {
 		log.Mylog.Error("os.Setenv", "EnterContainer", err)
 		return
 	}
-
 	if err := cmd.Run(); err != nil {
 		log.Mylog.Error("EnterContainer", "run", err)
 		return
