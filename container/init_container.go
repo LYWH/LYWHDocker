@@ -171,14 +171,29 @@ func setUpMount() error {
 //  @param rootUrl
 //  @param imageName
 //
-func newWorkSpace(rootUrl, imageName, volumeUrl, containerID string) []string {
-	readOnlyLayer := createReadOnlyLayer(rootUrl, imageName)
+func newWorkSpace(rootUrl, imagePath, volumeUrl, containerID string) []string {
+	imageName, err := checkImageFile(imagePath)
+	if err != nil {
+		log.Mylog.Error("newWorkSpace", "checkImageFile", err)
+		return nil
+	}
+	readOnlyLayer := createReadOnlyLayer(rootUrl, imagePath, imageName)
 	readAndWriteLayer := createReadAndWriteLayer(rootUrl, containerID)
 	mntLayer := createMountLayer(rootUrl, readOnlyLayer, readAndWriteLayer, containerID)
 	if _, err := extraVolumeUrl(volumeUrl); err == nil {
 		mountVolume(volumeUrl, mntLayer)
 	}
 	return []string{mntLayer, readAndWriteLayer}
+}
+
+func checkImageFile(imagePath string) (string, error) {
+	if has, err := DirOrFileExist(imagePath); err == nil && !has {
+		log.Mylog.Error("checkImageFile", "DirOrFileExist", err)
+		return "", err
+	}
+	splitPath := strings.Split(imagePath, "/")
+	tarName := splitPath[len(splitPath)-1]
+	return strings.Split(tarName, ".")[0], nil
 }
 
 //
@@ -188,11 +203,11 @@ func newWorkSpace(rootUrl, imageName, volumeUrl, containerID string) []string {
 //  @param imageName
 //  @return string
 //
-func createReadOnlyLayer(rootUrl, imageName string) string {
-	imageName = strings.Trim(imageName, "/")
+func createReadOnlyLayer(rootUrl, imagePath, imageName string) string {
+	//imageName = strings.Trim(imageName, "/")
 	//readOnlyPath := rootUrl + imageName + "/"
 	readOnlyPath := path.Join(rootUrl, "diff", imageName)
-	tarName := "./" + imageName + ".tar" //需要保证当前目录下有busybox.tar
+	//tarName := "./" + imageName + ".tar" //需要保证当前目录下有busybox.tar
 	if has, err := DirOrFileExist(readOnlyPath); err == nil && !has {
 		if err = os.MkdirAll(readOnlyPath, 0755); err != nil {
 			initContainerLog.WithFields(logrus.Fields{
@@ -200,7 +215,7 @@ func createReadOnlyLayer(rootUrl, imageName string) string {
 				"errFrom": "createReadOnlyLayer",
 			})
 		}
-		if _, err = exec.Command("tar", "-xvf", tarName, "-C", readOnlyPath).CombinedOutput(); err != nil {
+		if _, err = exec.Command("tar", "-xvf", imagePath, "-C", readOnlyPath).CombinedOutput(); err != nil {
 			initContainerLog.WithFields(logrus.Fields{
 				"err":     err,
 				"errFrom": "createReadOnlyLayer",
@@ -208,29 +223,6 @@ func createReadOnlyLayer(rootUrl, imageName string) string {
 		}
 
 	}
-
-	//if has, err := DirOrFileExist(readOnlyPath); err == nil && has {
-	//	//说明存在，先将其删除
-	//	if err = os.RemoveAll(readOnlyPath); err != nil {
-	//		initContainerLog.WithFields(logrus.Fields{
-	//			"err":     err,
-	//			"errFrom": "createMountLayer",
-	//		})
-	//	}
-	//}
-	//if err := os.Mkdir(readOnlyPath, 0755); err != nil {
-	//	initContainerLog.WithFields(logrus.Fields{
-	//		"err":     err,
-	//		"errFrom": "createReadOnlyLayer",
-	//	})
-	//}
-	////解压tar文件到只读层
-	//if _, err := exec.Command("tar", "-xvf", tarName, "-C", readOnlyPath).CombinedOutput(); err != nil {
-	//	initContainerLog.WithFields(logrus.Fields{
-	//		"err":     err,
-	//		"errFrom": "createReadOnlyLayer",
-	//	})
-	//}
 	return readOnlyPath
 }
 

@@ -19,7 +19,7 @@ var (
 	detach            = false
 	containerName     = ""
 	containerIDLenggh = 15
-	//inputContainerID  = ""
+	imageTarPath      = ""
 )
 
 const (
@@ -45,6 +45,7 @@ var rootCommand = &cobra.Command{
 var initCommand = &cobra.Command{
 	Use:   initUse,
 	Short: "use for init Container",
+	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return container.InitNewNameSpace()
 	},
@@ -61,17 +62,17 @@ var runCommand = &cobra.Command{
 		}
 		//在此处生成容器ID
 		containerID := container.GenerateContainerID(containerIDLenggh)
-		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, containerName, containerID)
+		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, containerName, containerID, imageTarPath)
 	},
 }
 
 var commitCommand = &cobra.Command{
-	Use:   commitUse,
+	Use:   "commit [container_id] [image_tar_name]",
 	Short: "commit the runing container",
 	Long:  "commit the runing container",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		container.CommitContainer(args[0])
+		container.CommitContainer(args[0], args[1])
 	},
 }
 

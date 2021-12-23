@@ -10,4 +10,5 @@ func init() {
 	runCommand.Flags().StringVarP(&Volume, "value", "v", "", "volume")
 	runCommand.Flags().BoolVarP(&detach, "detach", "d", false, "making the container process detach")
 	runCommand.Flags().StringVarP(&containerName, "name", "n", "", "the container name")
+	runCommand.Flags().StringVarP(&imageTarPath, "imageTarPath", "i", "./busybox.tar", "the image tar file path of the container")
 }
