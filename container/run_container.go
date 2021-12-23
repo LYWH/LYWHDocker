@@ -3,6 +3,7 @@ package container
 import (
 	"LYWHDocker/cgroups"
 	"LYWHDocker/cgroups/subsystems"
+	"LYWHDocker/config"
 	"LYWHDocker/log"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -53,7 +54,7 @@ func getParentProcess(tty bool, volume string, containerID string) (*exec.Cmd, *
 	}
 	//指定子进程继承管道的reader端
 	cmd.ExtraFiles = []*os.File{reader}
-	rootUrl := "/var/lib/LYWHDocker/aufs/"
+	rootUrl := config.RootUrl
 	mntUrl := path.Join(rootUrl, "mnt", containerID)
 	imageName := "busybox"
 	workSpaceRelatePath := newWorkSpace(rootUrl, imageName, volume, containerID)

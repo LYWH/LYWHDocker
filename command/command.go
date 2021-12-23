@@ -30,6 +30,7 @@ const (
 	psUse     = "ps"
 	logUse    = "log"
 	stopUse   = "stop"
+	removeUse = "remove"
 )
 
 var rootCommand = &cobra.Command{
@@ -119,6 +120,16 @@ var stopCommand = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		container.StopContainerByID(args[0])
+	},
+}
+
+var removeCommand = &cobra.Command{
+	Use:   removeUse,
+	Short: "remove container by container id",
+	Long:  "remove container by container id",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		container.RemoveContainerByCID(args[0])
 	},
 }
 
