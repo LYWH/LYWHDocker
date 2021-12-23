@@ -29,6 +29,7 @@ const (
 	commitUse = "commit"
 	psUse     = "ps"
 	logUse    = "log"
+	stopUse   = "stop"
 )
 
 var rootCommand = &cobra.Command{
@@ -108,6 +109,16 @@ var execCommand = &cobra.Command{
 		}
 		cid, cmdstr := args[0], strings.Split(args[1], " ")
 		container.EnterContainer(cid, cmdstr) //里面包含设置环境变量
+	},
+}
+
+var stopCommand = &cobra.Command{
+	Use:   stopUse,
+	Short: "stop the container by container ID",
+	Long:  "stop the container by container ID",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		container.StopContainerByID(args[0])
 	},
 }
 
