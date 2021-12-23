@@ -4,8 +4,11 @@ import (
 	"LYWHDocker/cgroups/subsystems"
 	"LYWHDocker/container"
 	"LYWHDocker/log"
+	"LYWHDocker/namespace"
 	"fmt"
 	"github.com/spf13/cobra"
+	"os"
+	"strings"
 )
 
 var (
@@ -86,6 +89,25 @@ var logCommand = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		container.OutPutContainerLog(args[0])
+	},
+}
+
+var execCommand = &cobra.Command{
+	Use:   "exec [containerID] [containerCMD]",
+	Short: "enter into existed container",
+	Long:  "enter into existed container",
+	Run: func(cmd *cobra.Command, args []string) {
+		//整体思路：根据进程ID获取容器ID和CMD，然后使用系统调用setns进入namespace并指向相应的命令
+		if len(os.Getenv(container.EXEC_ENV_PROCESS_ID)) != 0 { //此处是设置了环境变量后执行
+			namespace.EnterNamespace()
+			return
+		}
+		if len(args) < 2 { //参数不符合要求
+			log.Mylog.Error("execCommand", "don't available args")
+			return
+		}
+		cid, cmdstr := args[0], strings.Split(args[1], " ")
+		container.EnterContainer(cid, cmdstr) //里面包含设置环境变量
 	},
 }
 
