@@ -20,7 +20,7 @@ createData:2021/12/22
 func EnterContainer(containerID string, containerCMD []string) {
 	//根据容器ID获取进程ID
 	pid := getProecessIDbyCID(containerID)
-	if len(pid) == 0 {
+	if len(pid) == 0 || strings.Compare(pid, " ") == 0 {
 		log.Mylog.Error("EnterContainer", "getProecessIDbyCID")
 		return
 	}
