@@ -20,6 +20,7 @@ var (
 	containerName     = ""
 	containerIDLenggh = 15
 	imageTarPath      = ""
+	envVar            = []string{}
 )
 
 const (
@@ -62,7 +63,7 @@ var runCommand = &cobra.Command{
 		}
 		//在此处生成容器ID
 		containerID := container.GenerateContainerID(containerIDLenggh)
-		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, containerName, containerID, imageTarPath)
+		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, containerName, containerID, imageTarPath, envVar)
 	},
 }
 

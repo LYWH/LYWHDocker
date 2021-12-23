@@ -23,7 +23,7 @@ var runContainerLog = log.Mylog.WithFields(logrus.Fields{
 	"part": "runcontainer",
 })
 
-func getParentProcess(tty bool, volume string, containerID string, imagePath string) (*exec.Cmd, *os.File, []string) {
+func getParentProcess(tty bool, volume string, containerID string, imagePath string, enVar []string) (*exec.Cmd, *os.File, []string) {
 	//此处也不需要传递命令参数，命令的传递需要通过专门的发送和接收函数
 	//生成管道
 	reader, writer, err := getPip()
@@ -59,6 +59,7 @@ func getParentProcess(tty bool, volume string, containerID string, imagePath str
 	//imageName := "busybox"
 	workSpaceRelatePath := newWorkSpace(rootUrl, imagePath, volume, containerID)
 	cmd.Dir = mntUrl //指定工作目录
+	cmd.Env = append(os.Environ(), enVar...)
 	return cmd, writer, workSpaceRelatePath
 }
 
@@ -105,8 +106,8 @@ func sendCommand(writer *os.File, cmd string) error {
 //  @param tty
 //  @param command
 //
-func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig, Volume string, containerName string, containerID string, imagePath string) {
-	process, writer, workSpaceRelatePath := getParentProcess(tty, Volume, containerID, imagePath)
+func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig, Volume string, containerName string, containerID string, imagePath string, enVar []string) {
+	process, writer, workSpaceRelatePath := getParentProcess(tty, Volume, containerID, imagePath, enVar)
 	if err := process.Start(); err != nil {
 		log.Mylog.WithField("method", "syscall.Mount").Error(err)
 		runContainerLog.WithFields(logrus.Fields{

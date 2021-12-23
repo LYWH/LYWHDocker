@@ -2,8 +2,10 @@ package container
 
 import (
 	"LYWHDocker/log"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 )
 
@@ -43,10 +45,29 @@ func EnterContainer(containerID string, containerCMD []string) {
 		log.Mylog.Error("os.Setenv", "EnterContainer", err)
 		return
 	}
+
+	env := getEnvByPID(pid)
+	if env != nil {
+		//将容器进程的环境变量放入到exec进程中，第二次调用自己时新的子进程继承这些环境变量
+		cmd.Env = append(os.Environ(), env...)
+	}
+
 	if err := cmd.Run(); err != nil {
 		log.Mylog.Error("EnterContainer", "run", err)
 		return
 	}
+}
+
+func getEnvByPID(PID string) []string {
+	envPath := path.Join("/proc", PID, "environ")
+	contentBytes, err := ioutil.ReadFile(envPath)
+	if err != nil {
+		log.Mylog.Error("getEnvByPID", "ioutil.ReadFile", err)
+		return nil
+	}
+	//在environ文件中，分隔符使用的是\u0000
+	env := strings.Split(string(contentBytes), "\u0000")
+	return env
 }
 
 func getProecessIDbyCID(containerID string) string {
