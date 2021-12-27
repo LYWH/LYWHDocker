@@ -79,6 +79,7 @@ func RecordContainerInfo(containerPID int, cmd []string, containerName string, c
 	//将相应的信息写入对应文件夹中
 	//创建文件夹
 	infoPath := path.Join(DefaultInfoLocation, containerID)
+	fmt.Println(infoPath)
 	if err = os.MkdirAll(infoPath, 0711); err != nil {
 		log.Mylog.Error("infoPath", "os.MkdirAll", err)
 		return nil, err
@@ -119,12 +120,16 @@ func OutputContainerInfo() {
 
 	for _, file := range files { //读取DefaultInfoLocation文件夹下所有文件夹的内容
 		containerInfo, err := getContainerInfo(file.Name())
+		if file.Name() == "network" { //排除network文件夹的影响
+			continue
+		}
 		if err != nil {
 			log.Mylog.Error("getContainerInfo", err)
 			return
 		}
 		containersInfo = append(containersInfo, containerInfo)
 	}
+	fmt.Println(len(containersInfo))
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
 	fmt.Fprint(w, "ID\tNAME\tPID\tSTATUS\tCOMMAND\tCREATED\n")
 	for _, item := range containersInfo {
