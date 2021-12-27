@@ -179,7 +179,7 @@ var networkListCommand = &cobra.Command{
 	},
 }
 
-var deleteNetWorkCommand = &cobra.Command{
+var networkDeleteCommand = &cobra.Command{
 	Use:   "delete",
 	Short: "delete network",
 	Long:  "delete network",

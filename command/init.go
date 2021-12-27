@@ -1,7 +1,9 @@
 package command
 
 func init() {
-	rootCommand.AddCommand(initCommand, runCommand, commitCommand, psCommand, logCommand, execCommand, stopCommand, removeCommand)
+	rootCommand.AddCommand(initCommand, runCommand, commitCommand, psCommand, logCommand, execCommand, stopCommand, removeCommand, networkCommand)
+	networkCommand.AddCommand(networkCreateCommand, networkListCommand, networkDeleteCommand)
+
 	runCommand.Flags().BoolVarP(&tty, "tty", "t", false, "is use tty")
 	runCommand.Flags().StringVarP(&resourceLimit.Memory, "memory", "m", "100m", "limit for memory")
 	runCommand.Flags().StringVarP(&resourceLimit.CpuShare, "cpu-shares", "", "1024", "cpu time")
@@ -14,7 +16,7 @@ func init() {
 	runCommand.Flags().StringSliceVarP(&envVar, "set-environment", "e", []string{}, "set environment")
 
 	networkCreateCommand.Flags().StringVarP(&driver, "driver", "", "bridge", "network driver")
-	networkCreateCommand.Flags().StringVarP(&subnet, "sunnet", "", "", "subnet address")
+	networkCreateCommand.Flags().StringVarP(&subnet, "subnet", "", "", "subnet address")
 	networkCreateCommand.MarkFlagRequired(driver)
 	networkCreateCommand.MarkFlagRequired(subnet)
 }
