@@ -24,12 +24,13 @@ const (
 )
 
 type ContainerInfo struct {
-	Pid        string
-	Id         string
-	Name       string
-	Command    string
-	CreateTime string
-	Status     string
+	Pid         string
+	Id          string
+	Name        string
+	Command     string
+	CreateTime  string
+	Status      string
+	PortMapping []string //端口映射
 }
 
 var (
