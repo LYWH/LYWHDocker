@@ -24,6 +24,7 @@ var (
 	envVar            = []string{}
 	driver            = ""
 	subnet            = ""
+	networkName       = ""
 )
 
 const (
@@ -68,7 +69,7 @@ var runCommand = &cobra.Command{
 		}
 		//在此处生成容器ID
 		containerID := container.GenerateContainerID(containerIDLenggh)
-		container.RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, containerName, containerID, imageTarPath, envVar)
+		RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, containerName, containerID, imageTarPath, envVar, networkName)
 	},
 }
 

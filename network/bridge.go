@@ -48,9 +48,10 @@ func (b *BridgeNetWorkDriver) initBridge(n *NetWork) error {
 func createBridgeInterface(bridgeName string) error {
 	//检验是否有同名的网络设备
 	netInterface, err := net.InterfaceByName(bridgeName)
-	if netInterface != nil || err == nil {
-		log.Mylog.Error("createBridgeInterface", bridgeName, "exsited", err)
-		return err
+	if netInterface != nil || err == nil || !strings.Contains(err.Error(), "no such network interface") {
+		//log.Mylog.Error("createBridgeInterface", bridgeName, "exsited", err)
+		//return err
+		return fmt.Errorf(" Bridge interface %s exist!", bridgeName)
 	}
 	//创建link基础对象,其名字使用bridgeName
 	nl := netlink.NewLinkAttrs()
@@ -124,6 +125,7 @@ func (b *BridgeNetWorkDriver) Name() string {
 
 func (b *BridgeNetWorkDriver) Create(name, subnet string) (*NetWork, error) {
 	//获取子网字符串的网关ip和网络段IP
+	fmt.Println("============", subnet)
 	ip, ipRange, err := net.ParseCIDR(subnet)
 	if err != nil {
 		log.Mylog.Error("Create", "net.ParseCIDR", err)

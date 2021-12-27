@@ -14,6 +14,7 @@ func init() {
 	runCommand.Flags().StringVarP(&containerName, "name", "n", "", "the container name")
 	runCommand.Flags().StringVarP(&imageTarPath, "imageTarPath", "i", "./busybox.tar", "the image tar file path of the container")
 	runCommand.Flags().StringSliceVarP(&envVar, "set-environment", "e", []string{}, "set environment")
+	runCommand.Flags().StringVarP(&networkName, "net", "", "", "the network name")
 
 	networkCreateCommand.Flags().StringVarP(&driver, "driver", "", "bridge", "network driver")
 	networkCreateCommand.Flags().StringVarP(&subnet, "subnet", "", "", "subnet address")

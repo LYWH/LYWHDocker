@@ -1,8 +1,6 @@
 package container
 
 import (
-	"LYWHDocker/cgroups"
-	"LYWHDocker/cgroups/subsystems"
 	"LYWHDocker/config"
 	"LYWHDocker/log"
 	"github.com/sirupsen/logrus"
@@ -23,7 +21,7 @@ var runContainerLog = log.Mylog.WithFields(logrus.Fields{
 	"part": "runcontainer",
 })
 
-func getParentProcess(tty bool, volume string, containerID string, imagePath string, enVar []string) (*exec.Cmd, *os.File, []string) {
+func GetParentProcess(tty bool, volume string, containerID string, imagePath string, enVar []string) (*exec.Cmd, *os.File, []string) {
 	//此处也不需要传递命令参数，命令的传递需要通过专门的发送和接收函数
 	//生成管道
 	reader, writer, err := getPip()
@@ -84,7 +82,7 @@ func getPip() (*os.File, *os.File, error) {
 //  @param writer
 //  @param cmd
 //  @return error
-func sendCommand(writer *os.File, cmd string) error {
+func SendCommand(writer *os.File, cmd string) error {
 	if _, err := writer.WriteString(cmd); err != nil {
 		runContainerLog.WithFields(logrus.Fields{
 			"err": err,
@@ -106,37 +104,50 @@ func sendCommand(writer *os.File, cmd string) error {
 //  @param tty
 //  @param command
 //
-func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig, Volume string, containerName string, containerID string, imagePath string, enVar []string) {
-	process, writer, workSpaceRelatePath := getParentProcess(tty, Volume, containerID, imagePath, enVar)
-	if err := process.Start(); err != nil {
-		log.Mylog.WithField("method", "syscall.Mount").Error(err)
-		runContainerLog.WithFields(logrus.Fields{
-			"err":     err,
-			"errfrom": "RunContainer",
-		})
-		//开始限制资源
-	}
-	//记录容器信息
-	err := recordContainerInfo(process.Process.Pid, []string{cmd}, containerName, containerID)
-	if err != nil {
-		log.Mylog.Error("recordContainerInfo", err)
-		return
-	}
-	err = sendCommand(writer, cmd)
-	if err != nil {
-		return
-	}
-	cgroupsManager := cgroups.CGroupsManagerCreater(cgroupsManagerName+"_"+containerID, res)
-	cgroupsManager.Set()
-	cgroupsManager.Apply(process.Process.Pid)
-	if tty {
-		if err = process.Wait(); err != nil {
-			log.Mylog.Error(err)
-		}
-		deleteConfigInfo(containerID)
-		cgroupsManager.Remove()
-		deleteWorkSpace(workSpaceRelatePath)
-		os.Exit(1)
-	}
 
-}
+//func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig, Volume string, containerName string, containerID string, imagePath string, enVar []string, networkName string) {
+//	process, writer, workSpaceRelatePath := getParentProcess(tty, Volume, containerID, imagePath, enVar)
+//	if err := process.Start(); err != nil {
+//		log.Mylog.WithField("method", "syscall.Mount").Error(err)
+//		runContainerLog.WithFields(logrus.Fields{
+//			"err":     err,
+//			"errfrom": "RunContainer",
+//		})
+//		//开始限制资源
+//	}
+//	//记录容器信息
+//	containerinfo, err := recordContainerInfo(process.Process.Pid, []string{cmd}, containerName, containerID)
+//	if err != nil {
+//		log.Mylog.Error("recordContainerInfo", err)
+//		return
+//	}
+//
+//	if networkName != "" {
+//		//初始化网络
+//		if err := network.Init(); err != nil {
+//			log.Mylog.Error("error at init network\n", err)
+//			return
+//		}
+//		if err := network.Connect(networkName, containerinfo); err != nil {
+//			log.Mylog.Error("error at connect network\n", err)
+//			return
+//		}
+//	}
+//
+//	err = sendCommand(writer, cmd)
+//	if err != nil {
+//		return
+//	}
+//	cgroupsManager := cgroups.CGroupsManagerCreater(cgroupsManagerName+"_"+containerID, res)
+//	cgroupsManager.Set()
+//	cgroupsManager.Apply(process.Process.Pid)
+//	if tty {
+//		if err = process.Wait(); err != nil {
+//			log.Mylog.Error(err)
+//		}
+//		deleteConfigInfo(containerID)
+//		cgroupsManager.Remove()
+//		deleteWorkSpace(workSpaceRelatePath)
+//		os.Exit(1)
+//	}
+//}

@@ -87,6 +87,7 @@ func Init() error {
 	}); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -124,7 +125,7 @@ func CreateNetWork(dirver, subnet, name string) error {
 		return err
 	}
 	ipnet.IP = gatewayIP
-	network, err := drivers[dirver].Create(ipnet.String(), name)
+	network, err := drivers[dirver].Create(name, ipnet.String())
 	if err != nil {
 		log.Mylog.Error("CerateNetWork", "drivers[dirver].Create", err)
 		return err
@@ -142,7 +143,7 @@ func (network *NetWork) dump(filepath string) error {
 		}
 	}
 	networkFile := path.Join(filepath, network.Name)
-	file, err := os.OpenFile(networkFile, os.O_TRUNC|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile(networkFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		log.Mylog.Error("dump", "os.OpenFile", err)
 		return err
@@ -313,10 +314,10 @@ func configPortMapping(ep *EndPoint) error {
 
 func ListNetWork() {
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
-	fmt.Fprint(w, "Name\tIpRange\tDriver")
+	fmt.Fprint(w, "Name\tIpRange\tDriver\n")
 	//遍历网络信息
 	for _, nw := range networks {
-		fmt.Fprint(w, "%s\t%s\t%s\n", nw.Name, nw.IpRange, nw.Driver)
+		fmt.Fprintf(w, "%s\t%s\t%s\n", nw.Name, nw.IpRange, nw.Driver)
 	}
 	if err := w.Flush(); err != nil {
 		log.Mylog.Error("error output\n", err)

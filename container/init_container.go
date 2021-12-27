@@ -291,7 +291,7 @@ func createMountLayer(rootPath, readOnlyPath, readAndWriteLayer, containerID str
 //  @Description: 推出容器时需要删除工作空间
 //  @param workSpacePath，切片第一个元素表示mountlayer，第二个元素表示读写层元素
 //
-func deleteWorkSpace(workSpacePath []string) {
+func DeleteWorkSpace(workSpacePath []string) {
 	deleteMountLayer(workSpacePath[0])
 	deleteReadAndWriteLayer(workSpacePath[1])
 }

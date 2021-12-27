@@ -22,7 +22,7 @@ func RemoveContainerByCID(containerID string) {
 	if strings.Compare(containerInfo.Status, STOP) == 0 { //判断容器是否停止
 		mountLayer := path.Join(config.RootUrl, "mnt", containerID)
 		readAndWriteLayer := path.Join(config.RootUrl, "diff", containerID)
-		deleteWorkSpace([]string{mountLayer, readAndWriteLayer})
+		DeleteWorkSpace([]string{mountLayer, readAndWriteLayer})
 		containerRecordAndLogPath := path.Join(DefaultInfoLocation, containerInfo.Id)
 		if err = os.RemoveAll(containerRecordAndLogPath); err != nil {
 			log.Mylog.Error("os.RemoveAll", "RemoveContainerByCID", err)
