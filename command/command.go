@@ -5,6 +5,7 @@ import (
 	"LYWHDocker/container"
 	"LYWHDocker/log"
 	"LYWHDocker/namespace"
+	"LYWHDocker/network"
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
@@ -21,17 +22,21 @@ var (
 	containerIDLenggh = 15
 	imageTarPath      = ""
 	envVar            = []string{}
+	driver            = ""
+	subnet            = ""
 )
 
 const (
-	rootUse   = "root"
-	initUse   = "init"
-	runUse    = "run"
-	commitUse = "commit"
-	psUse     = "ps"
-	logUse    = "log"
-	stopUse   = "stop"
-	removeUse = "remove"
+	rootUse    = "root"
+	initUse    = "init"
+	runUse     = "run"
+	commitUse  = "commit"
+	psUse      = "ps"
+	logUse     = "log"
+	stopUse    = "stop"
+	removeUse  = "remove"
+	networkUse = "network"
+	//networkCreateUse = ""
 )
 
 var rootCommand = &cobra.Command{
@@ -132,6 +137,59 @@ var removeCommand = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		container.RemoveContainerByCID(args[0])
+	},
+}
+
+var networkCommand = &cobra.Command{
+	Use:   networkUse,
+	Short: "container network command",
+	Long:  "container network command",
+	Run: func(cmd *cobra.Command, args []string) {
+
+	},
+}
+
+var networkCreateCommand = &cobra.Command{
+	Use:   "create [netWorkName]",
+	Short: "create network",
+	Long:  "create network",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := network.Init(); err != nil {
+			log.Mylog.Error(err)
+			return
+		}
+		if err := network.CreateNetWork(driver, subnet, args[0]); err != nil {
+			log.Mylog.Error(err)
+			return
+		}
+	},
+}
+
+var networkListCommand = &cobra.Command{
+	Use:   "list",
+	Short: "list created network",
+	Long:  "list created network",
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := network.Init(); err != nil {
+			log.Mylog.Error(err)
+			return
+		}
+		network.ListNetWork()
+	},
+}
+
+var deleteNetWorkCommand = &cobra.Command{
+	Use:   "delete",
+	Short: "delete network",
+	Long:  "delete network",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := network.Init(); err != nil {
+			log.Mylog.Error(err)
+			return
+		}
+		network.DeleteWork(args[0])
 	},
 }
 

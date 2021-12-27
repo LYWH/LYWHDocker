@@ -114,7 +114,7 @@ func (nw *NetWork) load(dumpPath string) error {
 }
 
 //根据网络驱动创建网络
-func CerateNetWork(dirver, subnet, name string) error {
+func CreateNetWork(dirver, subnet, name string) error {
 	//将网段字符串转换为ipnet对象
 	_, ipnet, _ := net.ParseCIDR(subnet)
 	//分配网关，并将网段中的第一个IP作为网关IP
