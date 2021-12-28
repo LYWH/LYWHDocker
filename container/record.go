@@ -55,7 +55,7 @@ func GenerateContainerID(n int) string {
 	return fmt.Sprintf("%x", hashByte[:n])
 }
 
-func RecordContainerInfo(containerPID int, cmd []string, containerName string, containerID string) (*ContainerInfo, error) {
+func RecordContainerInfo(containerPID int, cmd []string, containerName string, containerID string, port []string) (*ContainerInfo, error) {
 	//containerID := GenerateContainerID(IDLength)
 	createTime := time.Now().Format("2006-01-02 15:04:05")
 	if containerName == "" {
@@ -63,12 +63,13 @@ func RecordContainerInfo(containerPID int, cmd []string, containerName string, c
 	}
 	//容器信息变量
 	containerInfo := ContainerInfo{
-		Pid:        strconv.Itoa(containerPID),
-		Id:         containerID,
-		Name:       containerName,
-		Command:    strings.Join(cmd, " "),
-		CreateTime: createTime,
-		Status:     RUNNING,
+		Pid:         strconv.Itoa(containerPID),
+		Id:          containerID,
+		Name:        containerName,
+		Command:     strings.Join(cmd, " "),
+		CreateTime:  createTime,
+		Status:      RUNNING,
+		PortMapping: port,
 	}
 	//序列化为json
 	jsonByte, err := json.Marshal(containerInfo)

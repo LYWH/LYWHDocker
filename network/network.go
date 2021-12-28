@@ -300,7 +300,7 @@ func configPortMapping(ep *EndPoint) error {
 			continue
 		}
 		//试用cmd的方式向iptables的PREROUTING中添加DNAT规则,将宿主机的端口转发请求转发到容器的地址和端口上
-		iptablesCmd := fmt.Sprintf("-t nat -A PREROUTING -p tcp -m tcp -dport %s -j DNAT --to-destination %s:%s",
+		iptablesCmd := fmt.Sprintf("-t nat -A PREROUTING -p tcp -m tcp --dport %s -j DNAT --to-destination %s:%s",
 			portMapping[0], ep.IPAddress.String(), portMapping[1])
 		cmd := exec.Command("iptables", strings.Split(iptablesCmd, " ")...)
 		output, err := cmd.Output()

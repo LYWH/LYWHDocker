@@ -25,6 +25,7 @@ var (
 	driver            = ""
 	subnet            = ""
 	networkName       = ""
+	port              = []string{}
 )
 
 const (
@@ -37,7 +38,6 @@ const (
 	stopUse    = "stop"
 	removeUse  = "remove"
 	networkUse = "network"
-	//networkCreateUse = ""
 )
 
 var rootCommand = &cobra.Command{
@@ -69,7 +69,7 @@ var runCommand = &cobra.Command{
 		}
 		//在此处生成容器ID
 		containerID := container.GenerateContainerID(containerIDLenggh)
-		RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, containerName, containerID, imageTarPath, envVar, networkName)
+		RunContainer(tty, args[0], myCgroupsName, resourceLimit, Volume, containerName, containerID, imageTarPath, envVar, networkName, port)
 	},
 }
 
@@ -190,6 +190,7 @@ var networkDeleteCommand = &cobra.Command{
 			log.Mylog.Error(err)
 			return
 		}
+		fmt.Println(args[0])
 		network.DeleteWork(args[0])
 	},
 }

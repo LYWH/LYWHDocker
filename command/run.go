@@ -22,7 +22,8 @@ createData:2021/12/27
 //  @param command
 //
 
-func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig, Volume string, containerName string, containerID string, imagePath string, enVar []string, networkName string) {
+func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsystems.ResourceConfig, Volume string, containerName string,
+	containerID string, imagePath string, enVar []string, networkName string, port []string) {
 	process, writer, workSpaceRelatePath := container.GetParentProcess(tty, Volume, containerID, imagePath, enVar)
 	if err := process.Start(); err != nil {
 		log.Mylog.WithField("method", "syscall.Mount").Error(err)
@@ -33,7 +34,7 @@ func RunContainer(tty bool, cmd string, cgroupsManagerName string, res *subsyste
 		//开始限制资源
 	}
 	//记录容器信息
-	containerinfo, err := container.RecordContainerInfo(process.Process.Pid, []string{cmd}, containerName, containerID)
+	containerinfo, err := container.RecordContainerInfo(process.Process.Pid, []string{cmd}, containerName, containerID, port)
 	if err != nil {
 		log.Mylog.Error("recordContainerInfo", err)
 		return
