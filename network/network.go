@@ -183,7 +183,7 @@ func Connect(networkName string, containerInfo *container.ContainerInfo) error {
 		PortMapping: containerInfo.PortMapping,
 		Network:     network,
 	}
-	//进入容器网络中的net namespace，调用网络驱动方法连接网络和端点
+	//调用网络驱动方法连接网络和端点
 	if err = drivers[network.Driver].Connect(network, ep); err != nil {
 		log.Mylog.Error("Connect", "drivers[network.Driver].Connect", err)
 		return err
@@ -229,7 +229,6 @@ func configEndPointIPAdressAndRoute(ep *EndPoint, cinfo *container.ContainerInfo
 		log.Mylog.Error("configEndPointIPAdressAndRoute", "setInterfaceUp", err)
 		return err
 	}
-
 	//设置容器内所有访问请求都经过veth的端点
 	//0.0.0.0/0网段表示所有的IP段
 	_, cidr, _ := net.ParseCIDR("0.0.0.0/0")
