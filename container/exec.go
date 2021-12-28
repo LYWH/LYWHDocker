@@ -29,13 +29,10 @@ func EnterContainer(containerID string, containerCMD []string) {
 	cmdStr := strings.Join(containerCMD, " ")
 	log.Mylog.Info(pid)
 	log.Mylog.Info(cmdStr)
-
 	cmd := exec.Command("/proc/self/exe", "exec")
-
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-
 	//设置环境变量
 	if err := os.Setenv(EXEC_ENV_PROCESS_ID, pid); err != nil {
 		log.Mylog.Error("os.Setenv", "EnterContainer", err)
@@ -45,13 +42,11 @@ func EnterContainer(containerID string, containerCMD []string) {
 		log.Mylog.Error("os.Setenv", "EnterContainer", err)
 		return
 	}
-
 	env := getEnvByPID(pid)
 	if env != nil {
 		//将容器进程的环境变量放入到exec进程中，第二次调用自己时新的子进程继承这些环境变量
 		cmd.Env = append(os.Environ(), env...)
 	}
-
 	if err := cmd.Run(); err != nil {
 		log.Mylog.Error("EnterContainer", "run", err)
 		return
