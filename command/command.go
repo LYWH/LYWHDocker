@@ -106,6 +106,7 @@ var execCommand = &cobra.Command{
 	Use:   "exec [containerID] [containerCMD]",
 	Short: "enter into existed container",
 	Long:  "enter into existed container",
+	//Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		//整体思路：根据进程ID获取容器ID和CMD，然后使用系统调用setns进入namespace并指向相应的命令
 		if len(os.Getenv(container.EXEC_ENV_PROCESS_ID)) != 0 { //此处是设置了环境变量后执行
@@ -113,6 +114,7 @@ var execCommand = &cobra.Command{
 			return
 		}
 		if len(args) < 2 { //参数不符合要求
+			fmt.Println(args)
 			log.Mylog.Error("execCommand", "don't available args")
 			return
 		}

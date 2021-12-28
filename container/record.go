@@ -120,17 +120,18 @@ func OutputContainerInfo() {
 	var containersInfo []*ContainerInfo
 
 	for _, file := range files { //读取DefaultInfoLocation文件夹下所有文件夹的内容
-		containerInfo, err := getContainerInfo(file.Name())
-		if file.Name() == "network" { //排除network文件夹的影响
+		if len(file.Name()) < 10 { //排除network文件夹的影响
 			continue
 		}
+		containerInfo, err := getContainerInfo(file.Name())
+
 		if err != nil {
 			log.Mylog.Error("getContainerInfo", err)
 			return
 		}
 		containersInfo = append(containersInfo, containerInfo)
 	}
-	fmt.Println(len(containersInfo))
+	//fmt.Println(len(containersInfo))
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
 	fmt.Fprint(w, "ID\tNAME\tPID\tSTATUS\tCOMMAND\tCREATED\n")
 	for _, item := range containersInfo {

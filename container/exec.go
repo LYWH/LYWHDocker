@@ -45,6 +45,7 @@ func EnterContainer(containerID string, containerCMD []string) {
 	env := getEnvByPID(pid)
 	if env != nil {
 		//将容器进程的环境变量放入到exec进程中，第二次调用自己时新的子进程继承这些环境变量
+		//加入系统环境变量的原因是：EXEC_ENV_PROCESS_ID、EXEC_ENV_PROCESS_CMD被设置成系统环境变量，加入系统环境变量后第二次执行才可以读取到
 		cmd.Env = append(os.Environ(), env...)
 	}
 	if err := cmd.Run(); err != nil {
