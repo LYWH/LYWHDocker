@@ -31,8 +31,9 @@ var ipAllocator = &IPAM{SubnetAllocatorPath: defaultIPAMAllocatorPath}
 func (ipam *IPAM) load() error {
 	//检查文件是否存在
 	if has, err := container.DirOrFileExist(ipam.SubnetAllocatorPath); err == nil && !has {
-		log.Mylog.Error("load", "container.DirOrFileExist", err)
-		return err
+		//如果不存在则说明还未分配
+		log.Mylog.Info("load", "container.DirOrFileExist", err)
+		return nil
 	}
 
 	configFile, err := os.Open(ipam.SubnetAllocatorPath)
@@ -52,7 +53,6 @@ func (ipam *IPAM) load() error {
 
 //将IP分配信息存储到文件中
 func (ipam *IPAM) dump() error {
-
 	//先检测存储的文件夹是否存在,不存在则创建
 	configPath, _ := path.Split(ipam.SubnetAllocatorPath)
 	if has, err := container.DirOrFileExist(configPath); err == nil && !has {

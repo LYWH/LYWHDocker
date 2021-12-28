@@ -87,7 +87,6 @@ func Init() error {
 	}); err != nil {
 		return err
 	}
-
 	return nil
 }
 
